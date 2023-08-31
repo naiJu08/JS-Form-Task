@@ -27,6 +27,7 @@ function addForm() {
   formCount++;
   let formContainer = document.querySelector(".form-container");
   let newForm = document.createElement("div");
+  newForm.setAttribute("data-form-index", formCount);
   newForm.innerHTML =
     `<hr><h2>Form ${formCount}</h2><hr>` +
     `<label for="${formCount}name">Name:</label><br>` +
@@ -49,10 +50,23 @@ function addForm() {
     `<div id="${formCount}hobbiesContainer">` +
     `<button onclick="addHobbyInput(${formCount})" id="hobby-button">+</button>` +
     `<button onclick="deleteHobbyInput(${formCount})" id="hobby-button">-</button>`+
-    `<input type="text" class="hobby-input" name="${formCount}hobbies">
+    `<input type="text" class="hobby-input" name="${formCount}hobbies">` +
+    `<button onclick="deleteForm(${formCount})" class="delete-form-button">Delete Form</button>
     </div>`;
   formContainer.appendChild(newForm);
 
+  if (formCount > 1) {
+    let deleteFormButtons = document.querySelectorAll(".delete-form-button");
+    deleteFormButtons.forEach(button => {
+      button.style.display = "block";
+    });
+  } else {
+    let deleteFormButtons = document.querySelectorAll(".delete-form-button");
+    deleteFormButtons.forEach(button => {
+      button.style.display = "none";
+    });
+  }
+  
   let dobInput = document.getElementById(`${formCount}dob`);
   dobInput.addEventListener("change", () => calculateAge(formCount));
     let removeFormButton = document.getElementById("deleteForm");
@@ -60,16 +74,20 @@ function addForm() {
 
 }
 
-function deleteForm() {
-  if (formCount > 1) {
-    let formContainer = document.querySelector(".form-container");
-    let formContainerDiv = document.querySelector(".form-container div");
-    formContainerDiv = formContainerDiv.previousSibling;
-    formContainer.removeChild(formContainer.lastChild);
-    formContainerDiv.style.display = "none";
+function deleteForm(formIndex) {
+  let formToDelete = document.querySelector(`[data-form-index="${formIndex}"]`);
+  if (formToDelete) {
+    formToDelete.remove();
     formCount--;
-    } else {
-    alert("Cannot delete the first form!");
+
+    if (formCount === 1) {
+      let deleteFormButtons = document.querySelectorAll(".delete-form-button");
+      deleteFormButtons.forEach(button => {
+        button.style.display = "none";
+      });
+    }
+  } else {
+    alert("Form not found!");
   }
 }
 
@@ -109,12 +127,14 @@ function preview() {
   
     for (let i = 0; i < data.length; i++) {
       let newRow = tableBody.insertRow();
+      newRow.id = `row-${Date.now()}`;
       let nameCell = newRow.insertCell(0);
       let addressCell = newRow.insertCell(1);
       let dobCell = newRow.insertCell(2);
       let ageCell = newRow.insertCell(3);
       let genderCell = newRow.insertCell(4);
       let hobbiesCell = newRow.insertCell(5);
+      let del = newRow.insertCell(6);
   
       nameCell.innerHTML = data[i].name;
       addressCell.innerHTML = data[i].address;
@@ -122,9 +142,21 @@ function preview() {
       ageCell.innerHTML = data[i].age;
       genderCell.innerHTML = data[i].gender;
       hobbiesCell.innerHTML = data[i].hobbies;
+
+      let deleteButton = document.createElement("button");
+      deleteButton.innerText = "Delete";
+      deleteButton.className = "taBleDeleteButton";
+      deleteButton.onclick = () => deleteTableRow(newRow.id);
+      del.appendChild(deleteButton);
     }
   }
   
+  function deleteTableRow(rowId) {
+    let rowToDelete = document.getElementById(rowId);
+    if (rowToDelete) {
+      rowToDelete.remove();
+    }
+  }
 
   function resetForm() {
     for (let i = 1; i <= formCount; i++) {
@@ -135,6 +167,12 @@ function preview() {
         document.getElementById(`${i}gender`).value = "";
         let hobbiesContainer = document.getElementById(`${i}hobbiesContainer`);
         hobbiesContainer.innerHTML = ""; 
+
+        let defaultHobbyInput = document.createElement("input");
+        defaultHobbyInput.className = "hobby-input";
+        defaultHobbyInput.name = `${i}hobbies`;
+        hobbiesContainer.appendChild(defaultHobbyInput);
+        hobbiesContainer.appendChild(document.createElement("br"));
    }
 }
 
